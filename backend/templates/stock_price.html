@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Details - {{ stock.name if stock else 'Not Found' }}</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .app-container {
+            min-height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .stock-details-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .stock-details-card {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        .stock-details-card h2 {
+            margin: 0 0 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a3c34;
+        }
+        .stock-details-card p {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+            color: #1a3c34;
+        }
+        .stock-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .metric-item {
+            background: #f0f2f5;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+        .metric-item h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1a3c34;
+        }
+        .metric-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #1a3c34;
+        }
+        .stock-chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        .stock-chart {
+            max-width: 100%;
+            height: auto;
+        }
+        .plot-toggle-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .plot-toggle-button {
+            padding: 0.5rem 1rem;
+            background: #e6f0ea;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #1a3c34;
+            transition: background 0.2s;
+        }
+        .plot-toggle-button:hover {
+            background: #d1e4d6;
+        }
+        .plot-toggle-button.active {
+            background: #2d6a4f;
+            color: #ffffff;
+        }
+        .button {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            background: #2d6a4f;
+            color: #ffffff;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .button:hover {
+            background: #245d3f;
+        }
+        .button-added {
+            background: #dc2626;
+        }
+        .button-added:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>Trend & Tide</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <button id="watchlist-link" style="background: none; border: none; color: #f0f2f5; text-decoration: none; font-size: 16px; font-weight: 400; cursor: pointer;">
+                                Watchlist
+                            </button>
+                        </li>
+                        <li>
+                            <button id="home-link" style="background: none; border: none; color: #f0f2f5; text-decoration: none; font-size: 16px; font-weight: 400; cursor: pointer;">
+                                Home
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2 class="page-title">Stock Details</h2>
+
+            <!-- Stock Details -->
+            {% if error %}
+                <p class="placeholder-text" style="color: red;">{{ error }}</p>
+            {% elif stock %}
+                <div class="stock-details-container">
+                    <div class="stock-details-card">
+                        <h2>{{ stock.name }}</h2>
+                        <p><strong>Date:</strong> {{ stock.date }}</p>
+                        <p><strong>Open Price:</strong> {% if stock.open is defined and stock.open != 0 %}₹{{ stock.open | round(2) }}{% else %}N/A{% endif %}</p>
+                        <p><strong>High Price:</strong> {% if stock.high is defined and stock.high != 0 %}₹{{ stock.high | round(2) }}{% else %}N/A{% endif %}</p>
+                        <p><strong>Low Price:</strong> {% if stock.low is defined and stock.low != 0 %}₹{{ stock.low | round(2) }}{% else %}N/A{% endif %}</p>
+                        <p><strong>Close Price:</strong> {% if stock.close is defined and stock.close != 0 %}₹{{ stock.close | round(2) }}{% elif stock.price is defined and stock.price != 0 %}₹{{ stock.price | round(2) }}{% else %}N/A{% endif %}</p>
+                        <p><strong>Volume:</strong> {% if stock.volume is defined and stock.volume != 0 %}{{ stock.volume | int }}{% else %}N/A{% endif %}</p>
+
+                        <!-- Calculated Metrics -->
+                        <div class="stock-metrics">
+                            <div class="metric-item">
+                                <h4>Daily Price Range</h4>
+                                <p>
+                                    {% if stock.high is defined and stock.low is defined and stock.high != 0 and stock.low != 0 %}
+                                        ₹{{ (stock.high - stock.low) | round(2) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="metric-item">
+                                <h4>Price Change (₹)</h4>
+                                <p class="{% if stock.close is defined and stock.open is defined and stock.close != 0 and stock.open != 0 %}{{ 'positive' if (stock.close - stock.open) > 0 else 'negative' if (stock.close - stock.open) < 0 else 'neutral' }}{% endif %}">
+                                    {% if stock.close is defined and stock.open is defined and stock.close != 0 and stock.open != 0 %}
+                                        ₹{{ (stock.close - stock.open) | round(2) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="metric-item">
+                                <h4>Price Change (%)</h4>
+                                <p class="{% if stock.close is defined and stock.open is defined and stock.close != 0 and stock.open != 0 %}{{ 'positive' if (stock.close - stock.open) > 0 else 'negative' if (stock.close - stock.open) < 0 else 'neutral' }}{% endif %}">
+                                    {% if stock.close is defined and stock.open is defined and stock.close != 0 and stock.open != 0 %}
+                                        {{ ((stock.close - stock.open) / stock.open * 100) | round(2) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="metric-item">
+                                <h4>Average Price</h4>
+                                <p>
+                                    {% if stock.open is defined and stock.high is defined and stock.low is defined and stock.close is defined and stock.open != 0 and stock.high != 0 and stock.low != 0 and stock.close != 0 %}
+                                        ₹{{ ((stock.open + stock.high + stock.low + stock.close) / 4) | round(2) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="metric-item">
+                                <h4>Volatility (%)</h4>
+                                <p>
+                                    {% if stock.high is defined and stock.low is defined and stock.close is defined and stock.high != 0 and stock.low != 0 and stock.close != 0 %}
+                                        {{ ((stock.high - stock.low) / stock.close * 100) | round(2) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <button id="watchlist-btn" class="button">Add to Watchlist</button>
+                    </div>
+
+                    <!-- Plot Type Toggle Buttons -->
+                    <div class="plot-toggle-buttons">
+                        <button id="line-plot-btn" class="plot-toggle-button {{ 'active' if plot_type == 'line' else '' }}" 
+                                data-stock-name="{{ stock.name }}">
+                            Line Plot
+                        </button>
+                        <button id="candlestick-chart-btn" class="plot-toggle-button {{ 'active' if plot_type == 'candlestick' else '' }}" 
+                                data-stock-name="{{ stock.name }}">
+                            Candlestick Chart
+                        </button>
+                    </div>
+
+                    <!-- Chart -->
+                    {% if chart_path %}
+                        <div class="stock-chart-container">
+                            <img src="/static/{{ chart_path }}" alt="{{ stock.name }} Price Chart" class="stock-chart">
+                        </div>
+                    {% else %}
+                        <p class="placeholder-text" style="color: red;">
+                            {% if chart_error %}
+                                {{ chart_error }}
+                            {% else %}
+                                No historical data available to display chart.
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="placeholder-text" style="color: red;">No stock data available.</p>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2025 Stock Market App. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/stockdetails.js"></script>
+</body>
+</html>

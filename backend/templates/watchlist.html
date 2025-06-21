@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watchlist - Trend & Tide</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header-pro">
+            <div class="header-content">
+                <h1>Trend & Tide</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <button onclick="window.location.href='/'" class="nav-button">
+                                Home
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2 class="page-title">Your Watchlist</h2>
+            <p class="subtitle-text">Track your favorite stocks with real-time updates.</p>
+
+            <!-- Watchlist Table -->
+            <div class="watchlist-table-container">
+                {% if watchlist_data and watchlist_data|length > 0 %}
+                    <div class="watchlist-table-header">
+                        <div class="watchlist-table-cell">Stock</div>
+                        <div class="watchlist-table-cell">Latest Price</div>
+                        <div class="watchlist-table-cell">Date</div>
+                        <div class="watchlist-table-cell">Action</div>
+                    </div>
+                    <div class="watchlist-table-body" id="watchlist-container">
+                        {% for item in watchlist_data %}
+                            <div class="watchlist-table-row">
+                                <div class="watchlist-table-cell">
+                                    <a href="/stock/{{ item.name }}" class="stock-link">{{ item.name }}</a>
+                                </div>
+                                <div class="watchlist-table-cell">₹{{ item.price | round(2) }}</div>
+                                <div class="watchlist-table-cell">{{ item.date }}</div>
+                                <div class="watchlist-table-cell">
+                                    <button class="remove-button" data-stock-name="{{ item.name }}">Remove</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="placeholder-text">Your watchlist is empty. Add stocks to start tracking!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer-pro">
+            <p>© 2025 Trend & Tide. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/watchlist.js"></script>
+</body>
+</html>

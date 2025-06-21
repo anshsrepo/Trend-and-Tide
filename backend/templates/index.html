@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trend & Tide</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>Trend & Tide</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <button id="watchlist-link" style="background: none; border: none; color: #f0f2f5; text-decoration: none; font-size: 16px; font-weight: 400; cursor: pointer;">
+                                Watchlist
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2 class="page-title">Trend & Tide</h2>
+
+            <!-- Stock Banner -->
+            <div class="stock-banner">
+                <div class="banner-content" id="banner-content">
+                    {% if stocks %}
+                        {% for stock in stocks %}
+                            <span class="banner-item">
+                                {{ stock.name }}: ₹{{ stock.price | round(2) }}
+                            </span>
+                        {% endfor %}
+                        {% for stock in stocks %}
+                            <span class="banner-item">
+                                {{ stock.name }}: ₹{{ stock.price | round(2) }}
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="banner-item">No stocks available</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="search-bar" placeholder="Search by stock name or industry..." autocomplete="off">
+                <div id="search-suggestions" class="suggestions"></div>
+            </div>
+
+            <p class="placeholder-text">Explore available stocks by industry.</p>
+
+            <!-- Grouped Stocks by Industry -->
+            <div id="stocks-container">
+                <p id="no-stocks-message" style="display: none;">No stocks available.</p>
+                {% if stocks %}
+                    {% set industries = stocks | map(attribute='industry') | list | unique %}
+                    {% for industry in industries %}
+                        <div class="industry-section" data-industry="{{ industry }}">
+                            <h3 class="industry-title">{{ industry | capitalize }} Stocks</h3>
+                            <div class="stocks-grid">
+                                {% for stock in stocks if stock.industry == industry %}
+                                    <div class="stock-card {{ 'positive-bg' if stock.percentage_change > 0 else 'negative-bg' if stock.percentage_change < 0 else 'neutral-bg' }}" data-name="{{ stock.name }}" data-url="{{ url_for('get_stock_price', stock_name=stock.name) }}">
+                                        <h3>{{ stock.name }}</h3>
+                                        <p>₹{{ stock.price | round(2) }}</p>
+                                        <p class="percentage-change {{ 'positive' if stock.percentage_change > 0 else 'negative' if stock.percentage_change < 0 else 'neutral' }}">
+                                            {{ '+' if stock.percentage_change > 0 else '' }}{{ stock.percentage_change | round(2) }}%
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p id="no-stocks-message">No stocks available.</p>
+                {% endif %}
+            </div>
+
+            {% if error %}
+                <p class="placeholder-text" style="color: red;">{{ error }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2025 Trend & Tide. All rights reserved.</p>
+        </footer>
+
+        <!-- Floating Assistant Button -->
+        <div id="assistant-button" style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 50; cursor: pointer;">
+            <div style="position: relative;">
+                <!-- Dialogue Bubble (Hidden by Default) -->
+                <div id="dialogue-bubble" class="dialogue-bubble" style="display: none;">
+                    Hey, I am Stocky, your trading assistant! Click me to explore more about stocks.
+                </div>
+                <!-- AI Image Button -->
+                <div class="ai-button-container" style="width: 4rem; height: 4rem; border-radius: 50%; border: 2px solid #2d6a4f; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                    <img src="{{ url_for('static', filename='ai.jpeg') }}" alt="Stocky AI" class="ai-button" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Overlay (Hidden by Default) -->
+        <div id="chat-overlay" class="chat-overlay">
+            <!-- Chat Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #d1d5db;">
+                <h2 style="font-size: 1.25rem; font-weight: 600; color: #1a3c34; margin: 0;">Chat with Stocky</h2>
+                <button id="close-chat" style="background: none; border: none; cursor: pointer;">
+                    <svg style="width: 1.5rem; height: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Chat Box -->
+            <div id="chat-box" class="chat-box" style="flex: 1; overflow-y: auto; padding: 1rem;">
+                <!-- Initial Assistant Message -->
+                <div class="chat-message assistant-message">
+                    <strong>Assistant:</strong> Hello! I can help you with stock information. Type a question to get started!
+                </div>
+            </div>
+            <!-- Chat Input -->
+            <div style="padding: 1rem; border-top: 1px solid #d1d5db;">
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="Ask about a stock (e.g., 'What is the 52-week low of Tata Motors?')" autocomplete="off" oninput="fetchChatSuggestions(this.value)" onkeydown="handleChatInput(event)" style="width: 100%;"/>
+                    <button onclick="sendMessage()" style="width: 100%; margin-top: 0.5rem;">Send</button>
+                    <div id="chat-suggestions" class="suggestions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+</body>
+</html>
