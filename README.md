@@ -1,4 +1,20 @@
 Trend & Tide Stock Market App
+
+![Image](https://github.com/user-attachments/assets/0f296ba7-8405-4bd9-9046-3e7b2318cd0f)
+
+![Image](https://github.com/user-attachments/assets/d8b9f870-ffb2-417a-b0c1-e762dbcd6529)
+
+![Image](https://github.com/user-attachments/assets/7deeb023-bae4-4bdc-a745-df8ff1b88aac)
+
+![Image](https://github.com/user-attachments/assets/934c1ac7-48f7-4ad1-9356-47766aabf215)
+
+![Image](https://github.com/user-attachments/assets/1ddf1cc1-2080-4bf5-9b8f-98508bba6a28)
+
+![Image](https://github.com/user-attachments/assets/ce95eda8-034c-4069-8fee-473054064c64)
+
+![Image](https://github.com/user-attachments/assets/b9c4d624-b2ff-400d-8992-d3caac049203)
+
+
 A dynamic full-stack web application designed to track, analyze, and manage stock prices using data from a provided CSV file, featuring AI-powered insights and interactive visualizations.
 Overview
 Trend & Tide empowers users to monitor stock performance, visualize trends, and gain actionable insights through an intuitive interface. Completed on May 20, 2025, this project showcases skills in web development, data visualization, and AI integration.
